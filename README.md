@@ -53,3 +53,74 @@ This project uses data analytics to transform the Yelp business dataset into act
 
 ### Market Opportunity
 12. Which city-category combinations show the strongest business opportunity?
+
+## Dataset
+
+The project uses the **Yelp Open Dataset**, focusing on the Business dataset.
+
+The analysis uses business-level information including:
+
+- Business ID
+- Business name
+- Address
+- City
+- State
+- Postal code
+- Latitude and longitude
+- Star rating
+- Review count
+- Business open/closed status
+- Business categories
+
+### Data Preparation
+
+The raw business data was processed using Python and Pandas before loading it into SQL Server.
+
+Key preparation steps included:
+
+- Handling records with missing business categories.
+- Standardizing whitespace in text fields.
+- Creating a business status field from the `is_open` indicator.
+- Normalizing business categories.
+- Creating a category dimension and business-category relationship table.
+- Validating business IDs, ratings, review counts, and status values.
+- Checking row counts and data consistency before SQL analysis.
+
+  ### Data Integration & Connectivity
+
+The project demonstrates data integration across multiple analytics platforms:
+
+- **Kaggle API → Python:** Connected to the Kaggle API to programmatically acquire the Yelp dataset.
+- **Python → SQL Server:** Connected Python to SQL Server using SQLAlchemy and PyODBC to load cleaned and transformed datasets.
+- **SQL Server → Power BI:** Connected Power BI to SQL Server analysis views for interactive reporting and visualization.
+  
+
+### Final Analytical Dataset
+
+| Dataset | Records |
+|---|---:|
+| Business | 150,243 |
+| Category | 1,311 |
+| Business-Category Relationships | 668,549 |
+
+### Data Source
+
+Yelp Open Dataset:  
+https://www.kaggle.com/datasets/yelp-dataset/yelp-dataset
+
+## Tools & Technologies
+
+| Area | Tools |
+|---|---|
+| Data Acquisition | Kaggle API |
+| Data Preparation | Python, Pandas, NumPy |
+| Database | Microsoft SQL Server |
+| SQL Analysis | T-SQL, CTEs, Joins, Aggregations, Views |
+| Data Visualization | Microsoft Power BI |
+| Data Modelling | Power BI Data Model, DAX |
+| Version Control | Git, GitHub |
+
+## Project Workflow
+
+**Data Acquisition → Data Preparation → SQL Database → Data Validation → Business Analysis → Power BI Dashboard → Business Insights**
+
