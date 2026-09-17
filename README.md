@@ -184,3 +184,52 @@ An interactive Power BI dashboard was developed to present the analytical result
 ## Dashboard Preview
 
 ![Yelp Business Intelligence - Performance & Market Opportunity Analysis](Dashboard/dashboard_preview.png)
+
+## Key Findings
+
+### Market
+
+- Philadelphia has the highest business presence in the dataset, with **14,566 businesses**.
+- Safety Harbor, Florida records the highest average rating among cities with at least 100 businesses, at **4.13**.
+- Philadelphia has the highest total review volume, with approximately **936K reviews**.
+- New Orleans records approximately **100 reviews per business**, indicating strong customer engagement intensity.
+
+### Categories
+
+- **Restaurants** is the largest business category, with **52,268 businesses**.
+- **Seafood** and **American (New)** show high customer engagement, with approximately **169** and **155 reviews per business**, respectively.
+- Categories such as **Walking Tours, Historical Tours, Distilleries, and Coffee Roasteries** combine strong ratings with meaningful customer engagement.
+
+### Business Performance
+
+- The performance analysis identifies businesses with strong combinations of ratings and review volume.
+- Several highly reviewed businesses have ratings below the overall dataset average of approximately **3.60**.
+- Highly rated businesses with relatively low review volumes were identified as potential **hidden-visibility opportunities**.
+
+### Market Opportunity
+
+- **561 city-category combinations** met the defined opportunity criteria.
+- Examples include **New Orleans – Historical Tours**, **New Orleans – Walking Tours**, **Santa Barbara – Tours**, **Santa Barbara – Wine Tours**, and **Nashville – Distilleries**.
+- These combinations demonstrate strong ratings and customer engagement under the project's defined criteria.
+
+Yelp-Data-Analytics-Project/
+│
+├── README.md
+│
+├── python/
+│   └── Yelp_Business_Analytics.ipynb
+│
+├── sql/
+│   └── Yelp_Business_Analytics.sql
+│
+├── powerbi/
+│   └── Yelp_Business_Analytics.pbix
+│
+├── presentation/
+│   └── Yelp_Business_Analytics.pptx
+│
+├── Dashboard/
+│   └── dashboard_preview.png
+│
+└── docs/
+    └── data_dictionary.md
