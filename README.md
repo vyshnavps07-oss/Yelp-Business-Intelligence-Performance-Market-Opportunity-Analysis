@@ -180,3 +180,7 @@ An interactive Power BI dashboard was developed to present the analytical result
 - Interactive filtering across dashboard visuals
 - SQL Server-connected Power BI reporting
 
+## Dashboard Preview
+## Dashboard Preview
+
+![Yelp Business Analytics Dashboard](dashboard/dashboard_preview.png)
