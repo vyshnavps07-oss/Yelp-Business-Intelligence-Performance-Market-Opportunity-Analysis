@@ -8,7 +8,7 @@ An end-to-end data analytics project using Python, SQL Server, and Power BI to a
 
 A one-page, stakeholder-facing recommendation memo distilling this analysis into a specific business decision for a non-technical audience:
 
-**[View Executive Memo →](executive-summary/market_expansion_memo.pdf)**
+**[View Executive Memo →](docs/market_expansion_memo.pdf)**
 
 ---
 
