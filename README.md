@@ -8,7 +8,7 @@ An end-to-end data analytics project using Python, SQL Server, and Power BI to a
 
 **Answer:** Of 150,243 businesses, 561 city-category combinations met the project's screening criteria. New Orleans Historical Tours (54 businesses, about 179 reviews per business) and Santa Barbara Wine Tours (55 businesses, 4.70 average rating) stand out and merit further evaluation. These are screening results, not proof of unmet demand.
 
-[Read the one-page executive memo](docs/Yelp_Market_Expansion_Executive_Memo_Revised.pdf)
+[Read the one-page executive memo](docs/Yelp_Market_Expansion_Executive_Memo.pdf)
 
 ## Business Problem
 
