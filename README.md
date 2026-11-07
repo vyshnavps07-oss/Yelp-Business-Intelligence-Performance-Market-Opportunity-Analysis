@@ -2,21 +2,19 @@
 
 An end-to-end data analytics project using Python, SQL Server, and Power BI to analyze business performance, customer engagement, market structure, and city-category opportunities using Yelp business data.
 
----
+## Executive Summary
 
-## 📄 Executive Summary
+**Question:** Which city-category segments should a business owner or investor evaluate first, based on observed ratings, review activity, and business presence?
 
-A one-page, stakeholder-facing recommendation memo distilling this analysis into a specific business decision for a non-technical audience:
+**Answer:** Of 150,243 businesses, 561 city-category combinations met the project's screening criteria. New Orleans Historical Tours (54 businesses, about 179 reviews per business) and Santa Barbara Wine Tours (55 businesses, 4.70 average rating) stand out and merit further evaluation. These are screening results, not proof of unmet demand.
 
-**[View Executive Memo →](docs/market_expansion_memo.pdf)**
-
----
+[Read the one-page executive memo](docs/Yelp_Market_Expansion_Executive_Memo_Revised.pdf)
 
 ## Business Problem
 
 Yelp contains information on businesses, ratings, and customer reviews across different cities and business categories. However, raw business data does not directly reveal where business activity is concentrated, which categories attract stronger customer engagement, or where potential market opportunities exist.
 
-This project uses data analytics to transform the Yelp business dataset into actionable insights by examining market presence, customer engagement, business performance, and city-category opportunities.
+This project transforms the Yelp business dataset into actionable insights by examining market presence, customer engagement, business performance, and city-category opportunities.
 
 ## Project Objectives
 
@@ -52,34 +50,33 @@ This project uses data analytics to transform the Yelp business dataset into act
 
 ## Dataset
 
-The project uses the **Yelp Open Dataset**, focusing on the Business dataset.
+The project uses the **Yelp Open Dataset** (Business file), downloaded from Kaggle:
+<https://www.kaggle.com/datasets/yelp-dataset/yelp-dataset>
 
-The analysis uses business-level information including: business ID, name, address, city, state, postal code, latitude/longitude, star rating, review count, open/closed status, and business categories.
+The raw Yelp files are not included in this repository. Download them from Kaggle and review Yelp's dataset terms before reuse.
 
-**Data Source:** [Yelp Open Dataset on Kaggle](https://www.kaggle.com/datasets/yelp-dataset/yelp-dataset)
+Fields used: business ID, name, address, city, state, postal code, latitude/longitude, star rating, review count, open/closed status, and business categories.
+
+**Coverage:** The dataset is a curated set of North American metropolitan areas (state codes include Canadian provinces such as Alberta), not a random sample of all businesses.
 
 ## Data Preparation
 
-The raw business data (150,346 records) was processed using Python and Pandas before loading it into SQL Server.
+The raw business data (150,346 records) was processed with Python and Pandas before loading into SQL Server.
 
-Key preparation steps included:
-
-- **Missing categories:** 103 records (0.07% of the dataset) had no assigned category and were removed, since category is required for all downstream category-level analysis. This left 150,243 usable records.
-- **Whitespace standardization:** 49 city values and 150 business name values had leading/trailing whitespace, cleaned to prevent duplicate groupings in aggregation queries.
-- **Business status field:** Created a readable `business_status` field ("Open"/"Closed") from the raw `is_open` binary indicator.
-- **Category normalization:** The raw `categories` field (a single comma-separated string per business) was split and normalized into a proper category dimension table and a business-category relationship (junction) table, supporting clean relational joins in SQL Server and Power BI.
-- **Data validation:** Confirmed zero duplicate business IDs, zero ratings outside the valid 1–5 range, zero negative review counts, and zero invalid `is_open` values before proceeding to analysis.
-- **Cross-platform validation:** After loading into SQL Server, row counts were validated programmatically against the Python-side counts for every table (business, category, business-category) to confirm no data was lost or duplicated during the transfer.
+- **Missing categories:** 103 records (0.07%) had no category and were removed, since category is required for category-level analysis. This left 150,243 records.
+- **Whitespace:** 49 city values and 150 business names had leading or trailing whitespace and were cleaned to prevent duplicate groupings.
+- **Business status:** Created a readable `business_status` field ("Open"/"Closed") from the raw `is_open` indicator.
+- **Category normalization:** The comma-separated `categories` field was split into a category dimension table and a business-category junction table.
+- **Validation:** Confirmed zero duplicate business IDs, zero ratings outside 1-5, zero negative review counts, and zero invalid `is_open` values.
+- **Reconciliation:** After loading into SQL Server, row counts for every table were compared with the Python-side counts.
 
 ## Data Integration & Connectivity
 
-The project demonstrates data integration across multiple analytics platforms:
+- **Kaggle to Python:** Yelp Open Dataset downloaded from Kaggle and loaded with Pandas.
+- **Python to SQL Server:** Cleaned tables loaded with SQLAlchemy and PyODBC.
+- **SQL Server to Power BI:** The Power BI report is built on the SQL Server analysis views.
 
-- **Kaggle API → Python:** Connected to the Kaggle API to programmatically acquire the Yelp dataset.
-- **Python → SQL Server:** Connected Python to SQL Server using SQLAlchemy and PyODBC to load cleaned and transformed datasets.
-- **SQL Server → Power BI:** Connected Power BI to SQL Server analysis views for interactive reporting and visualization.
-
-## Final Analytical Dataset
+### Final Analytical Dataset
 
 | Dataset | Records |
 |---|---|
@@ -91,7 +88,7 @@ The project demonstrates data integration across multiple analytics platforms:
 
 | Area | Tools |
 |---|---|
-| Data Acquisition | Kaggle API |
+| Data Acquisition | Kaggle |
 | Data Preparation | Python, Pandas, NumPy |
 | Database | Microsoft SQL Server |
 | SQL Analysis | T-SQL, CTEs, Joins, Aggregations, Views |
@@ -105,85 +102,65 @@ The project demonstrates data integration across multiple analytics platforms:
 
 ## SQL Analysis
 
-The cleaned datasets were loaded into Microsoft SQL Server for structured business analysis and validation, organized into four analytical areas:
+The cleaned datasets were loaded into SQL Server and analyzed in four areas: market analysis, category analysis, business performance, and market opportunity. The full queries are in [`sql/Yelp_Business_Analytics.sql`](sql/Yelp_Business_Analytics.sql).
 
-**Market Analysis** — Business concentration across cities and states; average business ratings by city; customer engagement based on review volume; markets with high business concentration but relatively low customer engagement.
+### Market Opportunity: Screening Criteria
 
-**Category Analysis** — Business presence by category; average rating by category; total review volume by category; categories combining strong ratings with strong customer engagement.
+A city-category combination counts as a **market opportunity** if it meets all three thresholds:
 
-**Business Performance** — Identification of top-performing businesses using rating and review volume; highly reviewed businesses with below-average ratings; highly rated businesses with relatively low review volume.
-
-**Market Opportunity** — Identification of city-category combinations with strong business presence, ratings, and customer engagement.
-
-### Market Opportunity — Defined Criteria
-
-A city-category combination is classified as a **market opportunity** if it meets all of the following thresholds:
-
-- At least **10 businesses** in that city-category combination (ensures the signal isn't driven by one or two outlier businesses)
+- At least **10 businesses** (so one or two outliers do not drive the result)
 - Average rating of **4.0 or higher**
-- Average of **50+ reviews per business**
+- Average of **50 or more reviews per business**
 
-This combination of volume, satisfaction, and engagement thresholds is designed to surface segments with *proven, validated* demand — not just a single standout business skewing the average.
+These are screening criteria. They show where ratings and review activity are strong, not where demand is unmet or where competition is low.
 
 ### SQL Views
-
-Three analytical views were created to support reporting and Power BI:
 
 | SQL View | Purpose |
 |---|---|
 | `vw_Business_Analysis` | Business-level analysis and reporting |
-| `vw_Category_Analysis` | Category-level performance and engagement analysis |
+| `vw_Category_Analysis` | Category-level performance and engagement |
 | `vw_Market_Opportunity` | City-category opportunity analysis |
 
 ## Power BI Dashboard
 
-An interactive Power BI dashboard was developed to present the analytical results through an executive-level view of market presence, customer engagement, business performance, and market opportunities.
+An interactive Power BI dashboard presents market presence, customer engagement, business performance, and market opportunities.
 
-### Dashboard Components
+**Components**
+- KPI cards: Total Businesses, Average Rating, Total Reviews
+- Market analysis: Business Presence by City, Top 10 Cities by Average Rating
+- Category analysis: Top 10 Categories by Presence, Top 10 Categories by Customer Engagement
+- Business performance: Popular but Weak Businesses
+- Market opportunity: Opportunity by City and Category
 
-- **KPI Cards** — Total Businesses, Average Rating, Total Reviews
-- **Market Analysis** — Business Presence by City, Top 10 Cities by Average Rating
-- **Category Analysis** — Top 10 Business Categories by Presence, Top 10 Categories by Customer Engagement
-- **Business Performance** — Highly Reviewed Businesses with Below-Average Ratings
-- **Market Opportunity** — Market Opportunity by City & Category
-
-### Interactive Features
-
-- City, State, and Business Status slicers
-- Interactive filtering across dashboard visuals
-- SQL Server-connected Power BI reporting
+**Interactive features:** City, State, and Business Status slicers with cross-filtering across visuals.
 
 ### Dashboard Preview
 
-![Yelp Business Intelligence - Performance & Market Opportunity Analysis](Dashboard/dashboard_preview.png)
+![Yelp Business Intelligence dashboard](Dashboard/dashboard_preview.png)
 
 ## Key Findings
 
 ### Market
-
-- Philadelphia has the highest business presence in the dataset, with **14,566 businesses**.
-- Safety Harbor, Florida records the highest average rating among cities with at least 100 businesses, at **4.13**.
-- Philadelphia has the highest total review volume, with approximately **936K reviews**.
-- New Orleans records approximately **100 reviews per business**, indicating strong customer engagement intensity.
+- Philadelphia has the most businesses in the dataset: **14,566**.
+- Safety Harbor, Florida has the highest average rating among cities with at least 100 businesses: **4.13**.
+- Philadelphia has the highest total review volume: about **936K reviews**.
+- New Orleans averages about **100 reviews per business**, indicating strong engagement intensity.
 
 ### Categories
-
-- **Restaurants** is the largest business category, with **52,268 businesses**.
-- **Seafood** and **American (New)** show high customer engagement, with approximately **169** and **155 reviews per business**, respectively.
-- Categories such as Walking Tours, Historical Tours, Distilleries, and Coffee Roasteries combine strong ratings with meaningful customer engagement.
+- **Restaurants** is the largest category, with **52,268 businesses**.
+- **Seafood** and **American (New)** show high engagement, with about **169** and **155 reviews per business**.
+- Categories such as Walking Tours, Historical Tours, Distilleries, and Coffee Roasteries combine strong ratings with meaningful engagement.
 
 ### Business Performance
-
-- The performance analysis identifies businesses with strong combinations of ratings and review volume.
-- Several highly reviewed businesses have ratings below the overall dataset average of approximately **3.60**.
-- Highly rated businesses with relatively low review volumes were identified as potential **hidden-visibility opportunities**.
+- Several highly reviewed businesses (1,000+ reviews) rate below the dataset average of about **3.60**.
+- Highly rated businesses (4.5+) with 50 to 200 reviews were identified as potential hidden-visibility cases.
 
 ### Market Opportunity
+- **561 city-category combinations** met the screening criteria above.
+- Dataset-wide baselines: average rating 3.60, average 44 reviews per business.
 
-- **561 city-category combinations** met the defined opportunity criteria (see [Market Opportunity — Defined Criteria](#market-opportunity--defined-criteria) above).
-- The strongest opportunities by rating and engagement include:
-
-| City | Category | Businesses | Avg Rating | Total Reviews |
+| City | Category | Businesses | Avg. rating | Total reviews |
 |---|---|---|---|---|
 | New Orleans, LA | Historical Tours | 54 | 4.59 | 9,663 |
 | New Orleans, LA | Walking Tours | 44 | 4.55 | 7,783 |
@@ -191,39 +168,51 @@ An interactive Power BI dashboard was developed to present the analytical result
 | Santa Barbara, CA | Wine Tours | 55 | 4.70 | 2,962 |
 | Nashville, TN | Historical Tours | 21 | 4.55 | 3,035 |
 
-- New Orleans' Historical Tours segment alone generated 9,663 reviews — over 200x the dataset's per-business average — while maintaining a 4.59 rating, well above the overall market baseline of 3.60.
-- Several strong-performing segments (e.g., New Orleans Food Tours: 13 businesses, 4.73 rating; New Orleans Rafting/Kayaking: 10 businesses, 4.70 rating) combine top-tier satisfaction with low competitive density — a pattern indicating headroom for new entrants rather than market saturation.
+New Orleans Historical Tours recorded 9,663 reviews across 54 businesses, about 179 reviews per business, roughly **4 times** the dataset-wide average of 44.
+
+Categories overlap: one business can appear in several categories (for example Tours and Wine Tours), so these rows are not independent opportunities.
 
 ## Limitations
 
-Yelp's dataset skews toward US metro areas with high app adoption and tourism activity; smaller cities, rural markets, and non-English-speaking regions are underrepresented. Ratings and review counts also reflect visibility and marketing reach, not purely service quality — a business with strong SEO or tourist foot traffic may outperform a comparable business in a lower-traffic location. Findings from this analysis should inform prioritization and further investigation, not replace on-the-ground due diligence.
+- Yelp covers selected metropolitan areas and does not represent the full business population.
+- Review counts are lifetime totals that measure platform activity, not unique customers. They are influenced by tourist traffic, visibility, and business age.
+- Average ratings are unweighted: a business with 5 reviews counts the same as one with 5,000.
+- The screening does not exclude closed businesses and does not measure closure rates, growth, or saturation.
+- Businesses appear in multiple categories, so category totals overlap.
+- The data is a single snapshot with no time trend.
+- Ratings and review counts alone cannot establish competition, unmet demand, or profitability.
+
+## Planned Improvements
+
+- Re-run the opportunity screen on open businesses only, with a review-weighted rating.
+- Add closure rate per segment as a risk indicator.
+- Use review dates to measure engagement growth.
+- Add category-overlap analysis for the top segments.
+
+## How to Reproduce
+
+1. Download the Yelp Open Dataset from Kaggle and place the Business JSON file where the notebook expects it.
+2. Run `python/Yelp_Business_Analytics.ipynb` to clean the data and load it into SQL Server (update the connection settings for your machine).
+3. Run `sql/Yelp_Business_Analytics.sql` to create the analysis queries and views.
+4. Open the Power BI file and refresh it against your SQL Server database.
 
 ## Repository Structure
 
 ```
 Yelp-Business-Intelligence-Performance-Market-Opportunity-Analysis/
-│
 ├── README.md
-│
 ├── python/
 │   └── Yelp_Business_Analytics.ipynb
-│
 ├── sql/
 │   └── Yelp_Business_Analytics.sql
-│
 ├── Dashboard/
 │   ├── Yelp_Business_Analytics.pbix
 │   └── dashboard_preview.png
-│
-├── executive-summary/
-│   └── market_expansion_memo.pdf
-│
 └── docs/
+    ├── Yelp_Market_Expansion_Executive_Memo_Revised.pdf
     └── data_dictionary.md
 ```
 
 ## Author
 
 **Vyshnav P S** | Data Analyst
-
-*This project is part of my data analytics portfolio.*
