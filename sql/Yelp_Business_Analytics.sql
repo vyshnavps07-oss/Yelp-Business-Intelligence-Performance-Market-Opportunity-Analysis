@@ -227,13 +227,13 @@ ORDER BY
     average_rating DESC,
     avg_reviews_per_business DESC;
 
+-- =====================================================
+-- CREATING VIEWS FOR POWER BI
+-- =====================================================
 
---- Creating Views for bi
---1 VIEW
-USE Yelp_Business_Analytics;
-GO
+-- VIEW 1: BUSINESS ANALYSIS
 
-CREATE OR ALTER VIEW vw_Business_Analysis AS
+CREATE OR ALTER VIEW dbo.vw_Business_Analysis AS
 SELECT
     business_id,
     name,
@@ -243,28 +243,31 @@ SELECT
     review_count,
     is_open,
     business_status
-FROM business;
+FROM dbo.business;
 GO
 
---- 2 VIEW
-USE Yelp_Business_Analytics;
-GO
 
-CREATE OR ALTER VIEW vw_Category_Analysis AS
+-- VIEW 2: CATEGORY ANALYSIS
+
+CREATE OR ALTER VIEW dbo.vw_Category_Analysis AS
 SELECT
     c.category,
     COUNT(DISTINCT b.business_id) AS business_count,
     ROUND(AVG(b.stars), 2) AS average_rating,
     ROUND(AVG(b.review_count), 2) AS avg_reviews_per_business,
     SUM(b.review_count) AS total_reviews
-FROM business b
-JOIN business_category bc
-
---- VIEW 3
-USE Yelp_Business_Analytics;
+FROM dbo.business b
+JOIN dbo.business_category bc
+    ON b.business_id = bc.business_id
+JOIN dbo.category c
+    ON bc.category_id = c.category_id
+GROUP BY c.category;
 GO
 
-CREATE OR ALTER VIEW vw_Market_Opportunity AS
+
+-- VIEW 3: MARKET OPPORTUNITY
+
+CREATE OR ALTER VIEW dbo.vw_Market_Opportunity AS
 SELECT
     b.city,
     b.state,
@@ -273,10 +276,10 @@ SELECT
     ROUND(AVG(b.stars), 2) AS average_rating,
     ROUND(AVG(b.review_count), 2) AS avg_reviews_per_business,
     SUM(b.review_count) AS total_reviews
-FROM business b
-JOIN business_category bc
+FROM dbo.business b
+JOIN dbo.business_category bc
     ON b.business_id = bc.business_id
-JOIN category c
+JOIN dbo.category c
     ON bc.category_id = c.category_id
 GROUP BY
     b.city,
@@ -287,34 +290,97 @@ HAVING
     AND AVG(b.stars) >= 4.0
     AND AVG(b.review_count) >= 50;
 GO
-    ON b.business_id = bc.business_id
-JOIN category c
-    ON bc.category_id = c.category_id
-GROUP BY
-    c.category;
-GO
 
 
---- FOR VERIFY
-
-USE Yelp_Business_Analytics;
-GO
+-- =====================================================
+-- VERIFY ALL THREE VIEWS
+-- =====================================================
 
 SELECT
     'Business Analysis' AS view_name,
     COUNT(*) AS row_count
-FROM vw_Business_Analysis
+FROM dbo.vw_Business_Analysis
 
 UNION ALL
 
 SELECT
     'Category Analysis',
     COUNT(*)
-FROM vw_Category_Analysis
+FROM dbo.vw_Category_Analysis
 
 UNION ALL
 
 SELECT
     'Market Opportunity',
     COUNT(*)
-FROM vw_Market_Opportunity;
+FROM dbo.vw_Market_Opportunity;
+GO
+
+
+-- =====================================================
+-- ADDITIONAL MARKET ANALYSIS
+-- =====================================================
+
+-- Top 15 market opportunity combinations
+
+SELECT TOP 15
+    city,
+    state,
+    category,
+    business_count,
+    average_rating,
+    avg_reviews_per_business,
+    total_reviews
+FROM dbo.vw_Market_Opportunity
+ORDER BY
+    average_rating DESC,
+    avg_reviews_per_business DESC;
+GO
+
+
+-- Selected cities: New Orleans, Santa Barbara, Nashville
+
+SELECT
+    city,
+    state,
+    category,
+    business_count,
+    average_rating,
+    avg_reviews_per_business
+FROM dbo.vw_Market_Opportunity
+WHERE city IN ('New Orleans', 'Santa Barbara', 'Nashville')
+ORDER BY
+    city,
+    average_rating DESC;
+GO
+
+
+-- Overall business metrics
+
+SELECT
+    COUNT(*) AS total_businesses,
+    ROUND(AVG(stars), 2) AS overall_avg_rating,
+    ROUND(AVG(review_count), 2) AS overall_avg_reviews
+FROM dbo.business;
+GO
+
+
+-- Business count by selected cities
+
+SELECT
+    city,
+    state,
+    category,
+    business_count
+FROM dbo.vw_Market_Opportunity
+WHERE city IN ('New Orleans', 'Santa Barbara', 'Nashville')
+ORDER BY business_count ASC;
+GO
+
+
+-- Total market opportunity combinations
+
+SELECT
+    COUNT(*) AS total_opportunity_combinations
+FROM dbo.vw_Market_Opportunity;
+GO
